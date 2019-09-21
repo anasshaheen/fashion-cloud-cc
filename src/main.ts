@@ -2,8 +2,19 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { ExpressServer } from './server';
+import { initDb } from './services';
 
-export default function initServer() {
+async function initServer() {
   const server = new ExpressServer();
-  server.start();
+  try {
+    await initDb();
+
+    server.start();
+  } catch (err) {
+    if (server.isRuning()) {
+      server.stop();
+    }
+  }
 }
+
+export default initServer;

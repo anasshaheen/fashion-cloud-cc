@@ -9,3 +9,7 @@ export interface IController {
   path: string;
   router: Router;
 }
+
+export interface IDbConfig {
+  url: string;
+}

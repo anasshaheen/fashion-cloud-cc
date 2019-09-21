@@ -12,18 +12,25 @@ export default class ExpressServer {
   private startingMessage: string;
   private app: Express;
   private server: Server;
+  private started: boolean;
 
   constructor(
     startingMessage: string = `server started at port ${serverConfig.port}`
   ) {
     this.startingMessage = startingMessage;
+    this.started = false;
     this.init();
   }
 
   start() {
     this.server = this.app.listen(serverConfig.port, () => {
+      this.started = true;
       console.log(this.startingMessage);
     });
+  }
+
+  isRuning() {
+    return this.started;
   }
 
   addControllers(controllers: IController[]) {
@@ -37,6 +44,7 @@ export default class ExpressServer {
       throw new Error('Server is not runnign!');
     }
 
+    this.started = false;
     this.server.close();
   }
 

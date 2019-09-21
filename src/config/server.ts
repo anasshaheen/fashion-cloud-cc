@@ -1,4 +1,4 @@
-import { IServerConfig } from 'src/types';
+import { IServerConfig } from '../types';
 
 const serverConfig: IServerConfig = {
   env: process.env.NODE_ENV as string,
