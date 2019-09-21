@@ -3,10 +3,12 @@ import { Schema, model } from 'mongoose';
 const CacheEntry = new Schema({
   key: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
+    index: true
   },
   value: {
-    type: Object,
+    type: String,
     required: true
   }
 });
