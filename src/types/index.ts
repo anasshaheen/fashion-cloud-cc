@@ -13,3 +13,8 @@ export interface IController {
 export interface IDbConfig {
   url: string;
 }
+
+export interface ICacehEntryConfig {
+  ttl: number;
+  maxNumberOfEntries: number;
+}

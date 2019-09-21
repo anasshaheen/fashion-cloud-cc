@@ -10,6 +10,12 @@ const CacheEntry = new Schema({
   value: {
     type: String,
     required: true
+  },
+  validTo: {
+    type: Number
+  },
+  createdAt: {
+    type: Number
   }
 });
 
