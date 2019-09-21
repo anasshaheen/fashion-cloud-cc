@@ -13,8 +13,8 @@
     "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node build/index.js\"",
     "start:prod": "yarn build && node build/index.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest --ci --verbose --forceExit --detectOpenHandles",
-    "test:watch": "jest --watchAll"
+    "test": "jest ./*.spec.ts",
+    "test:watch": "NODE_ENV=testing jest --watchAll"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -37,6 +37,7 @@
     "@types/mongoose": "^5.5.17",
     "@types/morgan": "^1.7.37",
     "@types/node": "^12.7.5",
+    "@types/supertest": "^2.0.8",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "supertest": "^4.0.2",
