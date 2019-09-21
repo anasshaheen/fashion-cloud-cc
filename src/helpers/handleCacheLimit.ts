@@ -2,9 +2,9 @@ import { cacheEntryConfig } from '../config';
 import { CacheEntry } from '../models';
 import { CommonHelpers } from './';
 
-// Handle max number of entries in the cache as follows:
-// if it's exceeded then remove the entries with TTL
-// that about to finish and created at is old.
+// Handle the max number of entries in the cache as follows: 
+// if the limit is exceeded then remove the entry with the TTL 
+// which is about to finish or is already finished and the creation time is the oldest.
 async function handleCahceLimit(key: string, value: string): Promise<boolean> {
   const count = await CacheEntry.countDocuments();
   if (count < cacheEntryConfig.maxNumberOfEntries) {
