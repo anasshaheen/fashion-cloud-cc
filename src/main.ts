@@ -2,13 +2,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { ExpressServer } from './server';
-import { initDb } from './services';
+import { DbServices } from './services';
 import controllers from './controllers';
 
 async function initServer() {
   const server = new ExpressServer();
   try {
-    await initDb();
+    await DbServices.initDb();
 
     server.addControllers(controllers);
     server.start();

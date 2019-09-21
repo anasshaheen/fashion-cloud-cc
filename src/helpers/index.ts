@@ -1,4 +1,5 @@
+import CommonHelpers from './commonHelpers';
+import handleCahceLimit from './handleCacheLimit';
 import HostingEnvironment from './hostingEnvironment';
-import generateRandomString from './generateRandomString';
 
-export { HostingEnvironment, generateRandomString };
+export { HostingEnvironment, CommonHelpers, handleCahceLimit };

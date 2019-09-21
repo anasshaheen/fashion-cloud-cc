@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 
-import { generateRandomString } from '../helpers';
+import { CommonHelpers, handleCahceLimit } from '../helpers';
 import { CacheEntry } from '../models';
 import { IController } from '../types';
 
@@ -23,8 +23,22 @@ class CacheEntriesController implements IController {
   }
 
   async getAll(_: Request, res: Response) {
+    const currentTime = new Date().getTime();
     const entries = await CacheEntry.find({});
-    const keys = entries.map(entry => entry.get('key'));
+    const keys = await Promise.all(
+      entries.map(async entry => {
+        if (entry.get('validTo') < currentTime) {
+          const newValue = CommonHelpers.generateRandomString();
+          await entry.updateOne({
+            value: newValue
+          });
+
+          return newValue;
+        }
+
+        return entry.get('key');
+      })
+    );
 
     return res.json({
       data: keys,
@@ -40,12 +54,18 @@ class CacheEntriesController implements IController {
     });
     if (!cacheEntry) {
       console.log('Cache miss');
-      const randStr = generateRandomString();
-      cacheEntry = new CacheEntry({
-        key,
-        value: randStr
-      });
-      await cacheEntry.save();
+
+      const randStr = CommonHelpers.generateRandomString();
+      const result = await handleCahceLimit(key, randStr);
+      if (!result) {
+        cacheEntry = new CacheEntry({
+          key,
+          value: randStr,
+          validTo: CommonHelpers.generateTtl(),
+          createdAt: new Date().getTime()
+        });
+        await cacheEntry.save();
+      }
 
       return res.status(200).json({
         message: 'Key retrived successfully!',
@@ -53,6 +73,9 @@ class CacheEntriesController implements IController {
       });
     } else {
       console.log('Cache hit');
+      await cacheEntry.updateOne({
+        validTo: CommonHelpers.generateTtl()
+      });
 
       return res.status(200).json({
         message: 'Key retrived successfully!',
@@ -68,12 +91,18 @@ class CacheEntriesController implements IController {
     let cacheEntry = await CacheEntry.findOne({
       key
     });
+
     if (!cacheEntry) {
-      cacheEntry = new CacheEntry({
-        key,
-        value
-      });
-      await cacheEntry.save();
+      const result = await handleCahceLimit(key, value);
+      if (!result) {
+        cacheEntry = new CacheEntry({
+          key,
+          value,
+          validTo: CommonHelpers.generateTtl(),
+          createdAt: new Date().getTime()
+        });
+        await cacheEntry.save();
+      }
 
       return res.status(201).json({
         message: 'Key is added successfully!'
@@ -115,7 +144,7 @@ class CacheEntriesController implements IController {
   }
 
   async removeAll(_: Request, res: Response) {
-    await CacheEntry.remove({}).exec();
+    await CacheEntry.deleteMany({}).exec();
 
     return res.status(200).json({
       message: 'All keys removed from cache successfully!'

@@ -1,3 +1,3 @@
-import initDb from './initDb';
+import DbServices from './db';
 
-export { initDb };
+export { DbServices };
