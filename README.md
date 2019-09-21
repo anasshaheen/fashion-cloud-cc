@@ -12,7 +12,7 @@ To Run the application:
 ```bash
 > yarn install # install dependencies.
 > yarn build # to build the application.
-> yarn start # to run the application in prod mode
+> yarn start:prod # to run the application in prod mode
 > yarn start:dev # run in dev mode
 ```
 
