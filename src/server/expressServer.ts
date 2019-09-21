@@ -35,7 +35,7 @@ export default class ExpressServer {
 
   addControllers(controllers: IController[]) {
     controllers.map(controller => {
-      this.app.use('/', controller.router);
+      this.app.use('/api', controller.router);
     });
   }
 
