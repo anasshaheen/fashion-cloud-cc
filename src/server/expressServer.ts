@@ -9,8 +9,8 @@ import { serverConfig } from '../config';
 import { IController } from '../types';
 
 export default class ExpressServer {
+  app: Express;
   private startingMessage: string;
-  private app: Express;
   private server: Server;
   private started: boolean;
 
