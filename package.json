@@ -13,7 +13,7 @@
     "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node build/index.js\"",
     "start:prod": "yarn build && node build/index.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest ./*.spec.ts",
+    "test": "NODE_ENV=testing jest --ci --verbose --forceExit --detectOpenHandles",
     "test:watch": "NODE_ENV=testing jest --watchAll"
   },
   "dependencies": {

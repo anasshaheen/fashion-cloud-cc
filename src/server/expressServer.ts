@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
@@ -27,6 +30,8 @@ export default class ExpressServer {
       this.started = true;
       console.log(this.startingMessage);
     });
+
+    return this.server;
   }
 
   isRuning() {

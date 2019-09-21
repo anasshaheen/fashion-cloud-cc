@@ -1,157 +1,169 @@
-import supertest from 'supertest';
+import { Server } from 'http';
+import { agent, SuperTest, Test } from 'supertest';
 
 import { ExpressServer } from '../../server';
-import controllers from '../../controllers';
 import { DbServices } from '../../services';
+import controllers from '../../controllers';
 
-const server = new ExpressServer();
-server.addControllers(controllers);
+const expressServer = new ExpressServer();
+expressServer.addControllers(controllers);
 
-beforeAll(async () => {
-  jest.setTimeout(30000);
-  await DbServices.initDb();
+let request: SuperTest<Test>;
+let server: Server;
+
+beforeAll(async done => {
+  const db = await DbServices.initDb();
+  await db.dropCollection('cacheentries');
+  server = expressServer.app.listen(done);
+  request = agent(server);
 });
 
-test('GET /api/cacheEntries/:key : valid payload, 200', done => {
-  supertest(server.app)
-    .get('/api/cacheEntries/123')
-    .expect(200)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'Key retrived successfully!';
-
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
+afterAll(done => {
+  server.close(done);
 });
 
-test('GET /api/cacheEntries : valid payload, 200', done => {
-  supertest(server.app)
-    .get('/api/cacheEntries')
-    .expect(200)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.data;
-        const expected = [123];
+describe('CacheEntries API', () => {
+  test('GET /api/cacheEntries/:key : valid payload, 200', done => {
+    return request
+      .get('/api/cacheEntries/123')
+      .expect(200)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'Key retrived successfully!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('DELETE /api/cacheEntries/:key : valid payload, 200', done => {
-  supertest(server.app)
-    .delete('/api/cacheEntries/123')
-    .expect(200)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'Key removed successfully!';
+  test('GET /api/cacheEntries : valid payload, 200', done => {
+    return request
+      .get('/api/cacheEntries')
+      .expect(200)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.data;
+          const expected = ['123'];
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('DELETE /api/cacheEntries : valid payload, 404', done => {
-  supertest(server.app)
-    .delete('/api/cacheEntries/123')
-    .expect(404)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'Key is not valid!';
+  test('DELETE /api/cacheEntries/:key : valid payload, 200', done => {
+    return request
+      .delete('/api/cacheEntries/123')
+      .expect(200)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'Key removed successfully!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('POST /api/cacheEntries : valid payload, 201', done => {
-  supertest(server.app)
-    .post('/api/cacheEntries/123456789')
-    .send({
-      value: '123456789'
-    })
-    .expect(201)
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'Key is added successfully!';
+  test('DELETE /api/cacheEntries : valid payload, 404', done => {
+    return request
+      .delete('/api/cacheEntries/123')
+      .expect(404)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'Key is not found!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('POST /api/cacheEntries : valid payload, 200', done => {
-  supertest(server.app)
-    .post('/api/cacheEntries/123456789')
-    .send({
-      value: '987456321'
-    })
-    .expect(200)
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'Key is updated successfully!';
+  test('POST /api/cacheEntries : valid payload, 201', done => {
+    return request
+      .post('/api/cacheEntries/123456789')
+      .send({
+        value: '123456789'
+      })
+      .expect(201)
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'Key is added successfully!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('DELETE /api/cacheEntries : valid payload, 200', done => {
-  supertest(server.app)
-    .delete('/api/cacheEntries')
-    .expect(200)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'All keys removed from cache successfully!';
+  test('POST /api/cacheEntries : valid payload, 200', done => {
+    return request
+      .post('/api/cacheEntries/123456789')
+      .send({
+        value: '987456321'
+      })
+      .expect(200)
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'Key is updated successfully!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
-});
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 
-test('DELETE /api/cacheEntries : valid payload, 200', done => {
-  supertest(server.app)
-    .delete('/api/cacheEntries')
-    .expect(200)
-    .end((err: any, res: any) => {
-      if (err) {
-        done(err);
-      } else {
-        const actual = res.body.message;
-        const expected = 'All keys removed from cache successfully!';
+  test('DELETE /api/cacheEntries : valid payload, 200', done => {
+    return request
+      .delete('/api/cacheEntries')
+      .expect(200)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'All keys removed from cache successfully!';
 
-        expect(actual).toEqual(expected);
-        done();
-      }
-    });
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
+
+  test('DELETE /api/cacheEntries : valid payload, 200', done => {
+    return request
+      .delete('/api/cacheEntries')
+      .expect(200)
+      .end((err: any, res: any) => {
+        if (err) {
+          done(err);
+        } else {
+          const actual = res.body.message;
+          const expected = 'All keys removed from cache successfully!';
+
+          expect(actual).toEqual(expected);
+          done();
+        }
+      });
+  });
 });

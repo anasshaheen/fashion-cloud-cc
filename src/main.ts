@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { ExpressServer } from './server';
 import { DbServices } from './services';
 import controllers from './controllers';
